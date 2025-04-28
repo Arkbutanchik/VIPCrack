@@ -8,5 +8,6 @@ def module_lib():
 	print("\nAvailable modules:")
 	print("------------------------")
 	print(f"{Fore.BLUE}net/arp_poison")
-	print(f"net/tcp_reset{Style.RESET_ALL}\n")
+	print(f"net/tcp_reset")
+	print(f"bluetooth/ble_dos{Style.RESET_ALL}\n")
 	return
