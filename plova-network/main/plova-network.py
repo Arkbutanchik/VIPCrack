@@ -10,6 +10,7 @@ from colorama import Style
 from modules import tcp_reset
 from modules import arp_poison
 from modules import module_lib
+from modules import bluetooth_dos
 
 def banner():
 	version="0.0.1"
@@ -45,6 +46,9 @@ def cinput():
 		elif(cmd[4:17] == "net/tcp_reset"):
 			print("\nUsing TCP [RST] flag attack!\n")
 			tcp_reset.tcp_reset()
+		elif(cmd[4:21] == "bluetooth/ble_dos"):
+			print("\nUsing Bluetooth DoS attack!\n")
+			bluetooth_dos.bluetooth_dos()
 		else:
 			print('\nUnknown module!\n')
 	else:
