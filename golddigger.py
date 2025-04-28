@@ -86,13 +86,13 @@ def crawl_filesystem(conn, current_path, args, depth=0):
             file_type = get_file_type(entry)
             
             show = False
-            if file_type == 'directory' and args.SHOW_DIRS:
+            if file_type == 'directory' and (args.SHOW_DIRS or not any([args.SHOW_DIRS, args.SHOW_IMAGES, args.SHOW_TEXT, args.SHOW_OTHER])):
                 show = True
-            elif file_type == 'image' and args.SHOW_IMAGES:
+            elif file_type == 'image' and (args.SHOW_IMAGES or not any([args.SHOW_DIRS, args.SHOW_IMAGES, args.SHOW_TEXT, args.SHOW_OTHER])):
                 show = True
-            elif file_type == 'text' and args.SHOW_TEXT:
+            elif file_type == 'text' and (args.SHOW_TEXT or not any([args.SHOW_DIRS, args.SHOW_IMAGES, args.SHOW_TEXT, args.SHOW_OTHER])):
                 show = True
-            elif file_type == 'other' and args.SHOW_OTHER:
+            elif file_type == 'other' and (args.SHOW_OTHER or not any([args.SHOW_DIRS, args.SHOW_IMAGES, args.SHOW_TEXT, args.SHOW_OTHER])):
                 show = True
                 
             if not show:
@@ -112,19 +112,17 @@ def crawl_filesystem(conn, current_path, args, depth=0):
 def main():
     args = parse_arguments()
     
-    if not any([args.SHOW_DIRS, args.SHOW_IMAGES, args.SHOW_TEXT, args.SHOW_OTHER]):
-        print("Error: No filters specified. Use at least one of -sd, -si, -st, or -so")
-        return
-    
     print(f'\033[33m{ASCII_ART}\033[0m')
     print(f"Connecting to {args.HOST} with user {args.USER}")
     print(f"Scanning filesystem starting from {args.ROOT} (max depth: {args.DEPTH})")
     
+    show_all = not any([args.SHOW_DIRS, args.SHOW_IMAGES, args.SHOW_TEXT, args.SHOW_OTHER])
+    
     active_filters = []
-    if args.SHOW_DIRS: active_filters.append("directories")
-    if args.SHOW_IMAGES: active_filters.append("images")
-    if args.SHOW_TEXT: active_filters.append("text files")
-    if args.SHOW_OTHER: active_filters.append("other files")
+    if args.SHOW_DIRS or show_all: active_filters.append("directories")
+    if args.SHOW_IMAGES or show_all: active_filters.append("images")
+    if args.SHOW_TEXT or show_all: active_filters.append("text files")
+    if args.SHOW_OTHER or show_all: active_filters.append("other files")
     print(f"Showing: {', '.join(active_filters)}")
     
     try:
@@ -148,13 +146,13 @@ def main():
             results = crawl_filesystem(conn, args.ROOT, args)
             
             print("\nColor Legend:")
-            if args.SHOW_DIRS:
+            if args.SHOW_DIRS or show_all:
                 print(f"{COLORS['directory']}[DIR] Directory{COLORS['reset']}")
-            if args.SHOW_IMAGES:
+            if args.SHOW_IMAGES or show_all:
                 print(f"{COLORS['image']}[IMAGE] Image file{COLORS['reset']}")
-            if args.SHOW_TEXT:
+            if args.SHOW_TEXT or show_all:
                 print(f"{COLORS['text']}[TEXT] Text file{COLORS['reset']}")
-            if args.SHOW_OTHER:
+            if args.SHOW_OTHER or show_all:
                 print(f"{COLORS['other']}[OTHER] Other file{COLORS['reset']}")
             print("-" * 50)
             
